@@ -1,0 +1,11 @@
+.list {
+  list-style: none;
+
+  & + button {
+    margin-top: 4rem;
+  }
+
+  > li + li {
+    margin-top: 3rem;
+  }
+}

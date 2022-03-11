@@ -1,0 +1,32 @@
+.anchor {
+  > h1 {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+  }
+
+  > h2 {
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    font-size: 1.125rem;
+    color: var(--body);
+  }
+
+  > div.info {
+    display: flex;
+    align-items: center;
+    gap: 1.625rem;
+
+    > span {
+      font-size: 0.875rem;
+      color: var(--info);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      > svg {
+        font-size: 20px;
+      }
+    }
+  }
+}

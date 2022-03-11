@@ -1,0 +1,21 @@
+.container {
+  max-width: 721px;
+  margin: 0 auto;
+}
+
+div.info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  svg {
+    font-size: 20px;
+  }
+
+  span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--info);
+  }
+}
