@@ -11,6 +11,6 @@ interface Post {
   };
 }
 
-export const getFormattedDate = (date: string): string => {
-  return format(new Date(date), 'dd MMM yyy', { locale: ptBR });
+export const getFormattedDate = (date: string, formatting: string): string => {
+  return format(new Date(date), formatting, { locale: ptBR });
 };

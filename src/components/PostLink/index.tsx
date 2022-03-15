@@ -27,7 +27,9 @@ export const PostLink = ({ post }: PostLinkProps): JSX.Element => {
         <div className={styles.info}>
           <span>
             <FiCalendar />
-            <time>{getFormattedDate(post.first_publication_date)}</time>
+            <time>
+              {getFormattedDate(post.first_publication_date, 'dd MMM yyy')}
+            </time>
           </span>
           <span>
             <FiUser />

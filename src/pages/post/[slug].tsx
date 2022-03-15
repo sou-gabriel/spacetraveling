@@ -5,6 +5,8 @@ import { useRouter } from 'next/router';
 import { useCallback } from 'react';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import { RichText } from 'prismic-dom';
+import { format } from 'date-fns';
+import ptBR from 'date-fns/locale/pt-BR';
 
 import { getPrismicClient } from '../../services/prismic';
 import { getFormattedDate } from '../../helpers/format';
@@ -14,6 +16,7 @@ import commonStyles from '../../styles/common.module.scss';
 
 interface Post {
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -35,6 +38,11 @@ interface PostProps {
 
 export default function Post({ post }: PostProps): JSX.Element {
   const router = useRouter();
+
+  const formattedLastEditDate = getFormattedDate(
+    post.last_publication_date,
+    'dd MMM yyy, kk:MM'
+  ).replace(', ', ', às ');
 
   const getTotalWords = useCallback((): number => {
     const totalWords = post.data.content.reduce((acc, item) => {
@@ -72,7 +80,10 @@ export default function Post({ post }: PostProps): JSX.Element {
                       <span>
                         <FiCalendar />
                         <time>
-                          {getFormattedDate(post.first_publication_date)}
+                          {getFormattedDate(
+                            post.first_publication_date,
+                            'dd MMM yyy'
+                          )}
                         </time>
                       </span>
                       <span>
@@ -84,6 +95,9 @@ export default function Post({ post }: PostProps): JSX.Element {
                         <time>{getReadingTime()} min</time>
                       </span>
                     </div>
+                    <p className={styles.editedAt}>
+                      * editado em {formattedLastEditDate}
+                    </p>{' '}
                   </header>
 
                   {post.data.content.map(item => (
