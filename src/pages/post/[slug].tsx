@@ -5,8 +5,8 @@ import { useRouter } from 'next/router';
 import { useCallback } from 'react';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import { RichText } from 'prismic-dom';
-import { format } from 'date-fns';
-import ptBR from 'date-fns/locale/pt-BR';
+import Link from 'next/link';
+import Prismic from '@prismicio/client';
 
 import { getPrismicClient } from '../../services/prismic';
 import { getFormattedDate } from '../../helpers/format';
@@ -15,6 +15,7 @@ import styles from './post.module.scss';
 import commonStyles from '../../styles/common.module.scss';
 
 interface Post {
+  uid: string;
   first_publication_date: string | null;
   last_publication_date: string | null;
   data: {
@@ -34,9 +35,15 @@ interface Post {
 
 interface PostProps {
   post: Post;
+  beforePost: Post | null;
+  afterPost: Post | null;
 }
 
-export default function Post({ post }: PostProps): JSX.Element {
+export default function Post({
+  post,
+  beforePost,
+  afterPost,
+}: PostProps): JSX.Element {
   const router = useRouter();
 
   const formattedLastEditDate = getFormattedDate(
@@ -71,47 +78,68 @@ export default function Post({ post }: PostProps): JSX.Element {
             {router.isFallback ? (
               <p>Carregando...</p>
             ) : (
-              <article className={styles.post}>
-                <img src={post.data.banner.url} alt="Banner" />
-                <div className={commonStyles.container}>
-                  <header>
-                    <h1>{post.data.title}</h1>
-                    <div className={commonStyles.info}>
-                      <span>
-                        <FiCalendar />
-                        <time>
-                          {getFormattedDate(
-                            post.first_publication_date,
-                            'dd MMM yyy'
-                          )}
-                        </time>
-                      </span>
-                      <span>
-                        <FiUser />
-                        <span>{post.data.author}</span>
-                      </span>
-                      <span>
-                        <FiClock />
-                        <time>{getReadingTime()} min</time>
-                      </span>
-                    </div>
-                    <p className={styles.editedAt}>
-                      * editado em {formattedLastEditDate}
-                    </p>{' '}
-                  </header>
+              <>
+                <article className={styles.post}>
+                  <img src={post.data.banner.url} alt="Banner" />
+                  <div className={commonStyles.container}>
+                    <header>
+                      <h1>{post.data.title}</h1>
+                      <div className={commonStyles.info}>
+                        <span>
+                          <FiCalendar />
+                          <time>
+                            {getFormattedDate(
+                              post.first_publication_date,
+                              'dd MMM yyy'
+                            )}
+                          </time>
+                        </span>
+                        <span>
+                          <FiUser />
+                          <span>{post.data.author}</span>
+                        </span>
+                        <span>
+                          <FiClock />
+                          <time>{getReadingTime()} min</time>
+                        </span>
+                      </div>
+                      <p className={styles.editedAt}>
+                        * editado em {formattedLastEditDate}
+                      </p>{' '}
+                    </header>
 
-                  {post.data.content.map(item => (
-                    <div key={item.heading} className={styles.content}>
-                      <h2>{item.heading}</h2>
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: RichText.asHtml(item.body),
-                        }}
-                      />
+                    {post.data.content.map(item => (
+                      <div key={item.heading} className={styles.content}>
+                        <h2>{item.heading}</h2>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: RichText.asHtml(item.body),
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </article>
+                <hr className={commonStyles.container} />
+                <div
+                  className={`${commonStyles.container} ${styles.navigationBetweenPosts}`}
+                >
+                  {beforePost && (
+                    <div className={styles.beforePost}>
+                      <p>{beforePost.data.title}</p>
+                      <Link href={`/post/${beforePost.uid}`}>
+                        Post anterior
+                      </Link>
                     </div>
-                  ))}
+                  )}
+                  {afterPost && (
+                    <div className={styles.afterPost}>
+                      <p>{afterPost.data.title}</p>
+                      <Link href={`/post/${afterPost.uid}`}>Próximo post</Link>
+                    </div>
+                  )}
                 </div>
-              </article>
+              </>
             )}
           </div>
         </main>
@@ -142,9 +170,21 @@ export const getStaticProps: GetStaticProps = async context => {
   const prismic = getPrismicClient();
   const post = await prismic.getByUID('posts', String(slug), {});
 
+  const timestamp = new Date(post.first_publication_date).getTime();
+
+  const beforePost = await prismic.query([
+    Prismic.predicates.dateBefore('document.first_publication_date', timestamp),
+  ]);
+
+  const afterPost = await prismic.query([
+    Prismic.predicates.dateAfter('document.first_publication_date', timestamp),
+  ]);
+
   return {
     props: {
       post,
+      beforePost: beforePost.results[0] || null,
+      afterPost: afterPost.results[0] || null,
     },
     revalidate: 60 * 30,
   };

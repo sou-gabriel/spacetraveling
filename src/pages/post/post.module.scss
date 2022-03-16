@@ -1,5 +1,7 @@
 // TODO
 .container {
+  padding-bottom: 5rem;
+
   > header {
     padding: 2.5rem 0;
   }
@@ -50,6 +52,41 @@
         strong {
           color: inherit;
         }
+      }
+    }
+  }
+
+  hr {
+    border: 1px solid var(--body);
+    opacity: 0.1;
+  }
+
+  div.navigationBetweenPosts {
+    margin-top: 3rem;
+    display: flex;
+    align-items: center;
+
+    > div.beforePost {
+      margin-right: auto;
+    }
+
+    > div.afterPost {
+      margin-left: auto;
+    }
+
+    p {
+      font-size: 1.125rem;
+      letter-spacing: -0.5px;
+      color: var(--heading);
+    }
+
+    a {
+      display: block;
+      margin-top: 0.5rem;
+      color: var(--highlight);
+
+      &:hover {
+        text-decoration: underline;
       }
     }
   }
