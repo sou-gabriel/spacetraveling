@@ -10,6 +10,7 @@ import Prismic from '@prismicio/client';
 
 import { getPrismicClient } from '../../services/prismic';
 import { getFormattedDate } from '../../helpers/format';
+import { Comments } from '../../components/Comments';
 
 import styles from './post.module.scss';
 import commonStyles from '../../styles/common.module.scss';
@@ -142,6 +143,7 @@ export default function Post({
               </>
             )}
           </div>
+          <Comments />
         </main>
       </div>
     </>
