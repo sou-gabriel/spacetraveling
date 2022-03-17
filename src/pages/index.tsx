@@ -1,5 +1,6 @@
 import { GetStaticProps } from 'next';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useState, useCallback } from 'react';
 import Prismic from '@prismicio/client';
 
@@ -24,6 +25,7 @@ interface PostPagination {
 }
 
 interface HomeProps {
+  preview: boolean;
   postsPagination: PostPagination;
 }
 
@@ -39,7 +41,10 @@ export const getFormattedPrismicPosts = (posts: Post[]): Post[] => {
   }));
 };
 
-export default function Home({ postsPagination }: HomeProps): JSX.Element {
+export default function Home({
+  preview,
+  postsPagination,
+}: HomeProps): JSX.Element {
   const [nextPageUrl, setNextPageUrl] = useState<string | null>(
     postsPagination.next_page
   );
@@ -71,11 +76,16 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
           <LoadNewPostsButton onLoadNewPosts={handleLoadNewPosts} />
         )}
       </div>
+      {preview && (
+        <Link href="/api/exit-preview">
+          <a className={commonStyles.preview}>Sair do modo preview</a>
+        </Link>
+      )}
     </>
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getStaticProps: GetStaticProps = async ({ preview = false }) => {
   const prismic = getPrismicClient();
   const postsResponse = await prismic.query(
     [Prismic.predicates.at('document.type', 'posts')],
@@ -86,6 +96,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
   return {
     props: {
+      preview,
       postsPagination: {
         next_page: postsResponse.next_page,
         results: posts,

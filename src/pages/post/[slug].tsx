@@ -2,10 +2,10 @@
 /* eslint-disable react/no-danger */
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { useCallback } from 'react';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import { RichText } from 'prismic-dom';
-import Link from 'next/link';
 import Prismic from '@prismicio/client';
 
 import { getPrismicClient } from '../../services/prismic';
@@ -35,15 +35,17 @@ interface Post {
 }
 
 interface PostProps {
+  preview: boolean;
   post: Post;
   beforePost: Post | null;
   afterPost: Post | null;
 }
 
 export default function Post({
-  post,
   beforePost,
   afterPost,
+  preview,
+  post,
 }: PostProps): JSX.Element {
   const router = useRouter();
 
@@ -144,6 +146,14 @@ export default function Post({
             )}
           </div>
           <Comments />
+
+          {preview && (
+            <aside>
+              <Link href="/api/exit-preview">
+                <a className={commonStyles.preview}>Sair do modo preview</a>
+              </Link>
+            </aside>
+          )}
         </main>
       </div>
     </>
@@ -166,11 +176,17 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async context => {
-  const { slug } = context.params;
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
+  const { slug } = params;
 
   const prismic = getPrismicClient();
-  const post = await prismic.getByUID('posts', String(slug), {});
+  const post = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref ?? null,
+  });
 
   const timestamp = new Date(post.first_publication_date).getTime();
 
@@ -184,6 +200,7 @@ export const getStaticProps: GetStaticProps = async context => {
 
   return {
     props: {
+      preview,
       post,
       beforePost: beforePost.results[0] || null,
       afterPost: afterPost.results[0] || null,
